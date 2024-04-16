@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_network
+    volumes:
+      - redis_data:/data
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    networks:
+      - backend_network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - backend_network
+
+  # server:
+  # 專案完成後推上docker hub可以直接pull image
+  #   image: server
+  #   container_name: site-api
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - backend_network
+  #   depends_on:
+  #     - mysql
+  #     - redis
+
+  # rabbitmq:
+  #   image: rabbitmq:latest
+  #   hostname: rabbitmq
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   networks:
+  #     - backend_network
+  # 原本想要用，但是壓力測試好像過了，所以先不用
+
+volumes:
+  mysql_data:
+  redis_data:
+  
+
+networks:
+  backend_network:
