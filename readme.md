@@ -23,3 +23,7 @@ MYSQL_PASSWORD = password
 2. 開啟server
 進入到目錄下使用`go run main.go`開啟server
 
+3. 部署注意事項
+    - 因為使用docker打包，所以要注意租用的server容量是否足夠，測試通過之後可以將phpmyadmin刪除
+    - 之後前端部署上去後可能需要修改信任的代理IP，目前是使用`127.0.0.1`
+    - 個人網站或許不需要redis，看需求做刪減

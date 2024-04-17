@@ -51,3 +51,15 @@ type Portfolio struct {
 	Tag          string    `json:"tag"`
 	PflcatID     int       `json:"pflcat_id"`
 }
+
+// 定义一个结构体用于解析 JSON 数据
+type PortfolioRequest struct {
+	PflcatID string `json:"pflcat_id"`
+}
+
+type CatRequest struct {
+	CatID string `json:"cat_id"`
+}
+type CategoryRequest struct {
+	CategoryID string `json:"category_id"`
+}
