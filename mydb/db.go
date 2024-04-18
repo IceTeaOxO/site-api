@@ -13,32 +13,39 @@ import (
 var DB *sql.DB
 
 func CreateTableSQL() {
-	// 指定要加載的.env文件的路徑，假設在特定資料夾中
-	envFilePath := "deployment/.env"
+	// // 指定要加載的.env文件的路徑，假設在特定資料夾中
+	// envFilePath := ".env"
 
-	// 使用godotenv庫的Load函數加載環境變數
-	err := godotenv.Load(envFilePath)
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
+	// // 使用godotenv庫的Load函數加載環境變數
+	// err := godotenv.Load(envFilePath)
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file: %v", err)
+	// }
 
-	// 讀取環境變數的值
-	dbName := os.Getenv("MYSQL_DATABASE")
-	dbUser := os.Getenv("MYSQL_USER")
-	dbPassword := os.Getenv("MYSQL_PASSWORD")
+	// // 讀取環境變數的值
+	// dbName := os.Getenv("MYSQL_DATABASE")
+	// dbUser := os.Getenv("MYSQL_USER")
+	// dbPassword := os.Getenv("MYSQL_PASSWORD")
+	// dbHost := os.Getenv("MYSQL_HOST")
 
-	// 連接到 MySQL 資料庫
-	DB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbName))
+	// // 連接到 MySQL 資料庫
+	// DB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbName))
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// defer DB.Close()
+
+	db, err := InitializeDB()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer DB.Close()
+	defer db.Close()
 
 	// 創建 category 資料表的 SQL 語句
 	createCategoryTableSQL := `
 	CREATE TABLE IF NOT EXISTS category (
 		category_id INT AUTO_INCREMENT PRIMARY KEY,
-		category_name VARCHAR(255) NOT NULL
+		 category_name VARCHAR(255) NOT NULL
 	);
 	`
 	// 創建 cat 資料表的 SQL 語句
@@ -91,28 +98,28 @@ func CreateTableSQL() {
 	`
 
 	// 執行 SQL 命令以創建資料表
-	_, err = DB.Exec(createCategoryTableSQL)
+	_, err = db.Exec(createCategoryTableSQL)
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = DB.Exec(createCatTableSQL)
+	_, err = db.Exec(createCatTableSQL)
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = DB.Exec(createPostsTableSQL)
+	_, err = db.Exec(createPostsTableSQL)
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = DB.Exec(createPflCategoryTableSQL)
+	_, err = db.Exec(createPflCategoryTableSQL)
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = DB.Exec(createPortfolioTableSQL)
+	_, err = db.Exec(createPortfolioTableSQL)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	fmt.Println("ad 資料表創建成功！")
+	fmt.Println("資料表創建成功！")
 }
 
 // 初始化資料庫連接
@@ -120,7 +127,7 @@ func InitializeDB() (*sql.DB, error) {
 	var err error
 
 	// 指定要加载的.env文件的路径，假设在特定文件夹中
-	envFilePath := "deployment/.env"
+	envFilePath := ".env"
 
 	// 使用godotenv库的Load函数加载环境变量
 	if loadErr := godotenv.Load(envFilePath); loadErr != nil {
@@ -131,17 +138,54 @@ func InitializeDB() (*sql.DB, error) {
 	dbName := os.Getenv("MYSQL_DATABASE")
 	dbUser := os.Getenv("MYSQL_USER")
 	dbPassword := os.Getenv("MYSQL_PASSWORD")
+	dbHost := os.Getenv("MYSQL_HOST")
 
-	DB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbName))
+	// 連接到 MySQL 資料庫
+	DB, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbName))
 	if err != nil {
-		return nil, err
+		panic(err.Error())
 	}
 
+	// 檢查連接是否成功
 	err = DB.Ping()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-
 	fmt.Println("Database connection established")
+
 	return DB, nil
 }
+
+// func InitializeGormDB() (*gorm.DB, error) {
+// 	var err error
+
+// 	// 指定要加载的.env文件的路径，假设在特定文件夹中
+// 	envFilePath := ".env"
+
+// 	// 使用godotenv库的Load函数加载环境变量
+// 	if loadErr := godotenv.Load(envFilePath); loadErr != nil {
+// 		return nil, fmt.Errorf("error loading .env file: %v", loadErr)
+// 	}
+
+// 	// 读取环境变量的值
+// 	dbName := os.Getenv("MYSQL_DATABASE")
+// 	dbUser := os.Getenv("MYSQL_USER")
+// 	dbPassword := os.Getenv("MYSQL_PASSWORD")
+// 	dbHost := os.Getenv("MYSQL_HOST")
+
+// 	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbName)
+
+// 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+// 	if err != nil {
+// 		panic("failed to connect database")
+// 	}
+
+// 	// 自动迁移模式，根据模型创建对应的表格
+// 	db.AutoMigrate(&models.Category{})
+// 	db.AutoMigrate(&models.Cat{})
+// 	db.AutoMigrate(&models.Post{})
+// 	db.AutoMigrate(&models.PflCategory{})
+// 	db.AutoMigrate(&models.Portfolio{})
+
+// 	return db, nil
+// }

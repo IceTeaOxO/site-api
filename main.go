@@ -40,7 +40,10 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	mydb.InitializeDB()
+
 	mydb.CreateTableSQL()
+	// mydb.InitializeGormDB()
 
 	redis.InitializeRedis()
 

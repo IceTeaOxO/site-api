@@ -4,7 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -12,15 +17,25 @@ import (
 var RDB *redis.Client
 
 func InitializeRedis() {
+	envFilePath := ".env"
+	err := godotenv.Load(envFilePath)
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// 讀取環境變數的值
+	redisHost := os.Getenv("REDIS_HOST")
+
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis 伺服器地址
-		Password: "",               // Redis 密碼，若無可不填
-		DB:       0,                // 使用的 Redis 資料庫
+		// Redis 伺服器地址
+		Addr:     fmt.Sprintf("%s:6379", redisHost),
+		Password: "", // Redis 密碼，若無可不填
+		DB:       0,  // 使用的 Redis 資料庫
 	})
 
 	// 測試 Redis 連接
-	_, err := RDB.Ping(context.Background()).Result()
-	if err != nil {
+	_, errPing := RDB.Ping(context.Background()).Result()
+	if errPing != nil {
 		panic(err)
 	}
 	fmt.Println("Redis 連接成功！")

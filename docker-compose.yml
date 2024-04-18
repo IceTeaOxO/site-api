@@ -3,6 +3,7 @@ version: '3'
 services:
   redis:
     image: redis:latest
+    container_name: redis
     ports:
       - "6379:6379"
     networks:
@@ -12,12 +13,13 @@ services:
 
   mysql:
     image: mysql:latest
-    container_name: mysql_db
+    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_HOST: ${MYSQL_HOST}
     ports:
       - "3306:3306"
     networks:
@@ -39,27 +41,22 @@ services:
     networks:
       - backend_network
 
-  # server:
-  # 專案完成後推上docker hub可以直接pull image
-  #   image: server
-  #   container_name: site-api
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - backend_network
-  #   depends_on:
-  #     - mysql
-  #     - redis
+  api:
+    # 因為dockerfile在目錄，所以用.
+      build: .
+      container_name: site-api
+      depends_on:
+        - mysql
+        - redis
+      env_file:
+        - .env
+      ports:
+        - "8080:8080"
+      networks:
+        - backend_network
+        
+      command: sh -c "while ! nc -z ${MYSQL_HOST} 3306; do sleep 1; done && ./main"
 
-  # rabbitmq:
-  #   image: rabbitmq:latest
-  #   hostname: rabbitmq
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  #   networks:
-  #     - backend_network
-  # 原本想要用，但是壓力測試好像過了，所以先不用
 
 volumes:
   mysql_data:
@@ -68,3 +65,4 @@ volumes:
 
 networks:
   backend_network:
+    driver: bridge

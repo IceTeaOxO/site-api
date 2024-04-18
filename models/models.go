@@ -4,16 +4,19 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	// "gorm.io/gorm"
 )
 
 // 大分類
 type Category struct {
+	// gorm.Model
 	CategoryID   int    `json:"category_id"`
 	CategoryName string `json:"category_name"`
 }
 
 // 小分類
 type Cat struct {
+	// gorm.Model
 	CatID      int    `json:"cat_id"`
 	CatName    string `json:"cat_name"`
 	CategoryID int    `json:"category_id"`
@@ -21,6 +24,7 @@ type Cat struct {
 
 // post
 type Post struct {
+	// gorm.Model
 	PostID       int       `json:"post_id"`
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
@@ -35,12 +39,14 @@ type Post struct {
 
 // pf category
 type PflCategory struct {
+	// gorm.Model
 	PflcatID   int    `json:"pflcat_id"`
 	PflcatName string `json:"pflcat_name"`
 }
 
 // portfolio
 type Portfolio struct {
+	// gorm.Model
 	PflID        int       `json:"pfl_id"`
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
